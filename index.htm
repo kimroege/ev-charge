@@ -10,7 +10,7 @@
 <body>
     <div class="container">
         <!-- Gear Icon -->
-        <button class="settings-btn" onclick="openSettings()">
+        <button class="settings-btn" aria-label="Settings">
             <svg class="settings-icon" viewBox="0 0 24 24">
                 <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
             </svg>
@@ -20,7 +20,7 @@
         <p class="subtitle" id="subtitle">Calculate your charging time</p>
 
         <!-- Main Car Selection -->
-        <select id="presetSelect" onchange="loadPreset()">
+        <select id="presetSelect">
             <option value="" id="optionCustom">-- Custom / New --</option>
         </select>
 
@@ -44,7 +44,7 @@
             <div class="form-group">
                 <label for="batteryCapacity" id="labelBatteryCapacity">Battery Capacity</label>
                 <div class="input-suffix">
-                    <input type="number" id="batteryCapacity" min="1" max="200" step="0.1" value="60" required>
+                    <input type="number" id="batteryCapacity" min="1" max="200" step="1" value="77" required>
                     <span class="suffix">kWh</span>
                 </div>
             </div>
@@ -70,16 +70,16 @@
     </div>
 
     <!-- Settings Modal -->
-    <div class="modal-overlay" id="settingsModal" onclick="closeSettings(event)">
+    <div class="modal-overlay" id="settingsModal">
         <div class="modal">
             <div class="modal-header">
                 <span class="modal-title" id="modalTitle">Settings</span>
-                <button class="close-modal" onclick="toggleSettings()">×</button>
+                <button class="close-modal">×</button>
             </div>
 
             <div class="modal-section">
                 <div class="modal-section-title" id="labelLanguage">Language</div>
-                <select id="languageSelect" onchange="changeLanguage()">
+                <select id="languageSelect">
                     <option value="en">English</option>
                     <option value="da">Dansk</option>
                     <option value="no">Norsk</option>
@@ -96,7 +96,7 @@
                 <div class="form-group" style="margin-bottom: 15px;">
                     <label for="chargePower" id="labelChargePower">Charging Power</label>
                     <div class="input-suffix">
-                        <input type="number" id="chargePower" min="1" max="350" step="0.1" value="11" required>
+                        <input type="number" id="chargePower" min="1" max="350" step="1" value="11" required>
                         <span class="suffix">kW</span>
                     </div>
                 </div>
@@ -110,12 +110,12 @@
                 </div>
 
                 <label class="checkbox-container">
-                    <input type="checkbox" id="taxRefundCheckbox" onchange="saveTaxRefundSetting()">
+                    <input type="checkbox" id="taxRefundCheckbox">
                     <span class="checkmark"></span>
                     <span class="checkbox-label" id="labelTaxRefund">Apply Tax Refund (0.895 DKK)</span>
                 </label>
                 <label class="checkbox-container">
-                    <input type="checkbox" id="showGraphCheckbox" onchange="saveGraphSetting()">
+                    <input type="checkbox" id="showGraphCheckbox">
                     <span class="checkmark"></span>
                     <span class="checkbox-label" id="labelShowGraph">Show Price Graph</span>
                 </label>
@@ -125,7 +125,7 @@
                 <div class="modal-section-title" id="labelSavePreset">Save Current Settings</div>
                 <div class="save-controls">
                     <input type="text" id="carNameInput" placeholder="Car Name">
-                    <button type="button" class="save-btn" onclick="savePreset()" id="btnSave">Save</button>
+                    <button type="button" class="save-btn" id="btnSave">Save</button>
                 </div>
             </div>
 
@@ -138,516 +138,10 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <script src="translations.js"></script>
-    <script>
-        // Default English translations
-        const defaultTranslations = {
-            "en": {
-                "title": "EV Charge Calculator",
-                "subtitle": "Calculate your charging time",
-                "modalTitle": "Settings",
-                "labelLanguage": "Language",
-                "labelSavePreset": "Save Current Settings",
-                "labelManageCars": "Manage Saved Cars",
-                "optionCustom": "-- Custom / New --",
-                "placeholderCarName": "Car Name (e.g. Tesla Model 3)",
-                "btnSave": "Save",
-                "msgSaved": "Preset saved!",
-                "msgDeleted": "Preset deleted!",
-                "msgEnterName": "Please enter a car name",
-                "labelCurrentSoc": "Current State of Charge",
-                "labelTargetSoc": "Target State of Charge",
-                "labelBatteryCapacity": "Battery Capacity",
-                "labelChargePower": "Charging Power",
-                "labelChargeEfficiency": "Charging Efficiency",
-                "calculateBtn": "Calculate",
-                "resultLabel": "Charging Time",
-                "energyNeeded": "Energy needed",
-                "errorInvalidRange": "Target charge must be higher than current charge",
-                "errorInvalidValues": "Please check your input values",
-                "hours": "hours",
-                "minutes": "minutes",
-                "and": "and",
-                "priceLabel": "Best Start Time",
-                "avgPrice": "Avg Price",
-                "totalCost": "Est. Cost",
-                "fetchError": "Could not fetch prices",
-                "labelTaxRefund": "Apply Tax Refund (0.895 DKK)",
-                "labelShowGraph": "Show Price Graph"
-            }
-        };
-
-        // Merge external translations if available
-        const allTranslations = typeof translations !== 'undefined' 
-            ? { ...defaultTranslations, ...translations } 
-            : defaultTranslations;
-
-        let currentLanguage = 'en';
-        let presets = {};
-        let priceChartInstance = null;
-
-        // Modal functions
-        function openSettings() {
-            document.getElementById('settingsModal').classList.add('show');
-            // Populate the list of cars when opening modal
-            updateCarList();
-        }
-
-        function toggleSettings() {
-            const modal = document.getElementById('settingsModal');
-            if (modal.classList.contains('show')) {
-                modal.classList.remove('show');
-            } else {
-                modal.classList.add('show');
-            }
-        }
-
-        function closeSettings(event) {
-            if (event.target === document.getElementById('settingsModal')) {
-                document.getElementById('settingsModal').classList.remove('show');
-            }
-        }
-
-        // Load presets from LocalStorage
-        function loadPresetsFromStorage() {
-            // Load Presets
-            const storedPresets = localStorage.getItem('evChargePresets');
-            if (storedPresets) {
-                try {
-                    presets = JSON.parse(storedPresets);
-                } catch (e) {
-                    console.error("Failed to parse presets", e);
-                    presets = {};
-                }
-            }
-            updatePresetDropdown();
-            updateCarList();
-
-            // Load Tax Refund Setting
-            const storedTaxRefund = localStorage.getItem('evChargeTaxRefund');
-            if (storedTaxRefund === 'true') {
-                document.getElementById('taxRefundCheckbox').checked = true;
-            }
-
-            // Load Graph Setting
-            const storedShowGraph = localStorage.getItem('evChargeShowGraph');
-            if (storedShowGraph === 'true') {
-                document.getElementById('showGraphCheckbox').checked = true;
-            }
-        }
-
-        // Save Tax Refund Setting
-        function saveTaxRefundSetting() {
-            const isChecked = document.getElementById('taxRefundCheckbox').checked;
-            localStorage.setItem('evChargeTaxRefund', isChecked);
-        }
-
-        // Save Graph Setting
-        function saveGraphSetting() {
-            const isChecked = document.getElementById('showGraphCheckbox').checked;
-            localStorage.setItem('evChargeShowGraph', isChecked);
-        }
-
-        // Save presets to LocalStorage
-        function savePresetsToStorage() {
-            localStorage.setItem('evChargePresets', JSON.stringify(presets));
-            updatePresetDropdown();
-            updateCarList();
-        }
-
-        // Update the main dropdown menu
-        function updatePresetDropdown() {
-            const select = document.getElementById('presetSelect');
-            const currentVal = select.value;
-            const t = allTranslations[currentLanguage] || allTranslations['en'];
-            
-            // Keep the first option (Custom/New)
-            select.innerHTML = `<option value="" id="optionCustom">${t.optionCustom}</option>`;
-            
-            // Add saved presets
-            Object.keys(presets).sort().forEach(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                select.appendChild(option);
-            });
-
-            // Restore selection if it still exists
-            if (presets[currentVal]) {
-                select.value = currentVal;
-            }
-        }
-
-        // Update the car list in the modal
-        function updateCarList() {
-            const list = document.getElementById('carList');
-            list.innerHTML = '';
-            
-            Object.keys(presets).sort().forEach(name => {
-                const item = document.createElement('li');
-                item.className = 'car-item';
-                
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'car-name';
-                nameSpan.textContent = name;
-                
-                const deleteBtn = document.createElement('div');
-                deleteBtn.className = 'delete-icon';
-                deleteBtn.innerHTML = '🗑️'; // Trash icon
-                deleteBtn.onclick = () => deletePreset(name);
-                
-                item.appendChild(nameSpan);
-                item.appendChild(deleteBtn);
-                list.appendChild(item);
-            });
-        }
-
-        // Load selected preset
-        function loadPreset() {
-            const select = document.getElementById('presetSelect');
-            const name = select.value;
-            
-            if (name && presets[name]) {
-                const p = presets[name];
-                document.getElementById('batteryCapacity').value = p.batteryCapacity;
-                document.getElementById('chargePower').value = p.chargePower;
-                if (p.chargeEfficiency) {
-                    document.getElementById('chargeEfficiency').value = p.chargeEfficiency;
-                }
-            }
-        }
-
-        // Save current values as preset
-        function savePreset() {
-            const name = document.getElementById('carNameInput').value.trim();
-            const batteryCapacity = document.getElementById('batteryCapacity').value;
-            const chargePower = document.getElementById('chargePower').value;
-            const chargeEfficiency = document.getElementById('chargeEfficiency').value;
-            const t = allTranslations[currentLanguage] || allTranslations['en'];
-
-            if (!name) {
-                alert(t.msgEnterName);
-                return;
-            }
-
-            presets[name] = {
-                batteryCapacity: batteryCapacity,
-                chargePower: chargePower,
-                chargeEfficiency: chargeEfficiency
-            };
-
-            savePresetsToStorage();
-            
-            // Select the newly saved preset
-            document.getElementById('presetSelect').value = name;
-            
-            // Clear input and close modal
-            document.getElementById('carNameInput').value = '';
-            alert(t.msgSaved);
-            toggleSettings();
-        }
-
-        // Delete preset
-        function deletePreset(name) {
-            const t = allTranslations[currentLanguage] || allTranslations['en'];
-
-            if (confirm(`${t.msgDeleted.replace('!', '')}? "${name}"`)) {
-                delete presets[name];
-                savePresetsToStorage();
-                
-                // If the deleted preset was selected, reset selection
-                if (document.getElementById('presetSelect').value === name) {
-                    document.getElementById('presetSelect').value = "";
-                    document.getElementById('batteryCapacity').value = "60";
-                    document.getElementById('chargePower').value = "11";
-                    document.getElementById('chargeEfficiency').value = "90";
-                }
-            }
-        }
-
-        // Detect browser language on load
-        function detectLanguage() {
-            const browserLang = navigator.language.toLowerCase().split('-')[0];
-            if (allTranslations[browserLang]) {
-                currentLanguage = browserLang;
-            } else {
-                currentLanguage = 'en';
-            }
-            document.getElementById('languageSelect').value = currentLanguage;
-            updateUI();
-        }
-
-        // Change language
-        function changeLanguage() {
-            currentLanguage = document.getElementById('languageSelect').value;
-            updateUI();
-            updatePresetDropdown(); 
-            updateCarList();
-        }
-
-        // Update UI with current language
-        function updateUI() {
-            const t = allTranslations[currentLanguage] || allTranslations['en'];
-            document.getElementById('title').textContent = t.title;
-            document.getElementById('subtitle').textContent = t.subtitle;
-            document.getElementById('modalTitle').textContent = t.modalTitle;
-            document.getElementById('labelLanguage').textContent = t.labelLanguage;
-            document.getElementById('labelSavePreset').textContent = t.labelSavePreset;
-            document.getElementById('labelManageCars').textContent = t.labelManageCars;
-            document.getElementById('labelTaxRefund').textContent = t.labelTaxRefund;
-            document.getElementById('labelShowGraph').textContent = t.labelShowGraph;
-            
-            // Update preset UI labels
-            const customOption = document.getElementById('optionCustom');
-            if(customOption) customOption.textContent = t.optionCustom;
-            document.getElementById('carNameInput').placeholder = t.placeholderCarName;
-            document.getElementById('btnSave').textContent = t.btnSave;
-
-            document.getElementById('labelCurrentSoc').textContent = t.labelCurrentSoc;
-            document.getElementById('labelTargetSoc').textContent = t.labelTargetSoc;
-            document.getElementById('labelBatteryCapacity').textContent = t.labelBatteryCapacity;
-            document.getElementById('labelChargePower').textContent = t.labelChargePower;
-            document.getElementById('labelChargeEfficiency').textContent = t.labelChargeEfficiency;
-            document.getElementById('calculateBtn').textContent = t.calculateBtn;
-            document.getElementById('resultLabel').textContent = t.resultLabel;
-            document.title = t.title;
-        }
-
-        // Fetch prices and find best charge time
-        async function fetchAndCalculatePrices(hoursNeeded, energyNeeded) {
-            const t = allTranslations[currentLanguage] || allTranslations['en'];
-            const priceResultDiv = document.getElementById('priceResult');
-            
-            try {
-                priceResultDiv.style.display = 'block';
-                document.getElementById('bestStartTime').textContent = "Loading...";
-                document.getElementById('priceDetails').textContent = "";
-
-                // Using corsproxy.io to bypass CORS
-                // Production Note: A dedicated proxy (e.g. Cloudflare Worker) is recommended for stability
-                const proxyUrl = 'https://corsproxy.io/?';
-                const targetUrl = 'https://billigkwh.dk/api/Priser/HentPriser?sted=DK1&netselskab=n1_c&produkt=norlys_flexel';
-                
-                const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-                if (!response.ok) throw new Error('Network response was not ok');
-                
-                const data = await response.json();
-                
-                // Flatten price data into a single timeline
-                let allPrices = [];
-                const now = new Date();
-                const currentHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0);
-
-                // Check tax refund setting
-                const applyTaxRefund = document.getElementById('taxRefundCheckbox').checked;
-                const taxRefundAmount = 0.895;
-                const taxRefundEndDate = new Date('2026-01-01T00:00:00');
-
-                data.forEach(dayData => {
-                    const date = new Date(dayData.dato);
-                    dayData.priser.forEach((price, hourIndex) => {
-                        const priceTime = new Date(date);
-                        priceTime.setHours(hourIndex);
-                        
-                        // Only include future/current prices
-                        if (priceTime >= currentHour) {
-                            let finalPrice = price;
-                            
-                            // Apply refund if enabled and valid date
-                            if (applyTaxRefund && priceTime < taxRefundEndDate) {
-                                finalPrice -= taxRefundAmount;
-                            }
-
-                            allPrices.push({
-                                time: priceTime,
-                                price: finalPrice
-                            });
-                        }
-                    });
-                });
-
-                // Find best start time
-                // Round up hours needed to check full slots (simple algorithm)
-                // For a more precise calc, we'd split the last hour. keeping it simple for now.
-                const slotsNeeded = Math.ceil(hoursNeeded);
-                
-                if (allPrices.length < slotsNeeded) {
-                    document.getElementById('bestStartTime').textContent = "Not enough data";
-                    document.getElementById('priceDetails').textContent = "Check back later";
-                    return;
-                }
-
-                let bestStartIndex = 0;
-                let minTotalCost = Infinity;
-
-                // Iterate through possible start times
-                for (let i = 0; i <= allPrices.length - slotsNeeded; i++) {
-                    let currentTotal = 0;
-                    for (let j = 0; j < slotsNeeded; j++) {
-                        currentTotal += allPrices[i + j].price;
-                    }
-
-                    if (currentTotal < minTotalCost) {
-                        minTotalCost = currentTotal;
-                        bestStartIndex = i;
-                    }
-                }
-
-                const bestStart = allPrices[bestStartIndex];
-                const avgPrice = minTotalCost / slotsNeeded;
-                const totalEstimatedCost = avgPrice * energyNeeded; // Cost for the specific energy amount
-
-                // Format result
-                const startTimeStr = bestStart.time.toLocaleTimeString(currentLanguage, { hour: '2-digit', minute: '2-digit', hour12: false });
-                document.getElementById('bestStartTime').textContent = `Start: ${startTimeStr}`;
-                document.getElementById('priceDetails').textContent = 
-                    `${t.avgPrice}: ${avgPrice.toFixed(2)} DKK/kWh | ${t.totalCost}: ${totalEstimatedCost.toFixed(2)} DKK`;
-
-                // Graph Logic
-                const showGraph = document.getElementById('showGraphCheckbox').checked;
-                const graphContainer = document.getElementById('graphContainer');
-                
-                if (showGraph && allPrices.length > 0) {
-                    graphContainer.style.display = 'block';
-                    const ctx = document.getElementById('priceChart').getContext('2d');
-                    
-                    if (priceChartInstance) {
-                        priceChartInstance.destroy();
-                    }
-
-                    const labels = allPrices.map(p => p.time.toLocaleTimeString(currentLanguage, { hour: '2-digit', minute: '2-digit', hour12: false }));
-                    const prices = allPrices.map(p => p.price);
-                    
-                    // Create background colors array to highlight the best window
-                    const bgColors = prices.map((_, index) => {
-                        if (index >= bestStartIndex && index < bestStartIndex + slotsNeeded) {
-                            return 'rgba(75, 192, 192, 0.8)'; // Highlight color (Green/Teal)
-                        }
-                        return 'rgba(201, 203, 207, 0.5)'; // Default color (Grey)
-                    });
-
-                    priceChartInstance = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Price (DKK/kWh)',
-                                data: prices,
-                                backgroundColor: bgColors,
-                                borderRadius: 4,
-                                borderSkipped: false
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    grid: { color: '#f0f0f0' }
-                                },
-                                x: {
-                                    grid: { display: false }
-                                }
-                            },
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    backgroundColor: 'rgba(0,0,0,0.8)',
-                                    padding: 10,
-                                    cornerRadius: 8,
-                                    callbacks: {
-                                        label: function(context) {
-                                            return context.parsed.y.toFixed(2) + ' DKK';
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-                } else {
-                    graphContainer.style.display = 'none';
-                }
-
-            } catch (error) {
-                console.error("Fetch error:", error);
-                document.getElementById('bestStartTime').textContent = "Error";
-                document.getElementById('priceDetails').textContent = t.fetchError;
-            }
-        }
-
-        // Calculate charging time
-        function calculateChargingTime(event) {
-            event.preventDefault();
-
-            const currentSoc = parseFloat(document.getElementById('currentSoc').value);
-            const targetSoc = parseFloat(document.getElementById('targetSoc').value);
-            const batteryCapacity = parseFloat(document.getElementById('batteryCapacity').value);
-            const chargePower = parseFloat(document.getElementById('chargePower').value);
-            const chargeEfficiency = parseFloat(document.getElementById('chargeEfficiency').value);
-            const t = allTranslations[currentLanguage] || allTranslations['en'];
-
-            // Validation
-            if (targetSoc <= currentSoc) {
-                alert(t.errorInvalidRange);
-                document.getElementById('targetSoc').classList.add('error');
-                setTimeout(() => {
-                    document.getElementById('targetSoc').classList.remove('error');
-                }, 500);
-                return;
-            }
-
-            if (isNaN(currentSoc) || isNaN(targetSoc) || isNaN(batteryCapacity) || isNaN(chargePower) || isNaN(chargeEfficiency) ||
-                currentSoc < 0 || targetSoc > 100 || batteryCapacity <= 0 || chargePower <= 0 || chargeEfficiency <= 0 || chargeEfficiency > 100) {
-                alert(t.errorInvalidValues);
-                return;
-            }
-
-            // Calculate energy needed
-            const energyNeeded = (batteryCapacity * (targetSoc - currentSoc)) / 100;
-            
-            // Calculate effective charging power considering efficiency loss
-            const effectiveChargePower = chargePower * (chargeEfficiency / 100);
-            
-            // Calculate time in hours
-            const timeInHours = energyNeeded / effectiveChargePower;
-            
-            // Convert to hours and minutes
-            const hours = Math.floor(timeInHours);
-            const minutes = Math.round((timeInHours - hours) * 60);
-
-            // Display result
-            let timeText = '';
-            if (hours > 0 && minutes > 0) {
-                timeText = `${hours} ${t.hours} ${t.and} ${minutes} ${t.minutes}`;
-            } else if (hours > 0) {
-                timeText = `${hours} ${t.hours}`;
-            } else {
-                timeText = `${minutes} ${t.minutes}`;
-            }
-
-            document.getElementById('resultValue').textContent = timeText;
-            document.getElementById('resultDetails').textContent = 
-                `${t.energyNeeded}: ${energyNeeded.toFixed(2)} kWh`;
-            
-            const resultDiv = document.getElementById('result');
-            resultDiv.classList.add('show');
-            
-            // Trigger price fetch
-            fetchAndCalculatePrices(timeInHours, energyNeeded);
-            
-            // Smooth scroll to result
-            setTimeout(() => {
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }, 100);
-        }
-
-        // Event listeners
-        document.getElementById('chargeForm').addEventListener('submit', calculateChargingTime);
-
-        // Initialize
-        detectLanguage();
-        loadPresetsFromStorage();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
