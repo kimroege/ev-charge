@@ -67,6 +67,10 @@
         <div id="graphContainer" style="margin-top: 20px; display: none; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
             <canvas id="priceChart"></canvas>
         </div>
+
+        <div class="api-attribution">
+            <span id="dataAttribution">Price data from</span> <a href="https://stromligning.dk" target="_blank" rel="noopener">Strømligning.dk</a>
+        </div>
     </div>
 
     <!-- Settings Modal -->
@@ -93,6 +97,14 @@
             <div class="modal-section">
                 <div class="modal-section-title">Options</div>
                 
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="priceAreaSelect" id="labelPriceArea">Price Area</label>
+                    <select id="priceAreaSelect">
+                        <option value="DK1">DK1 (West / Jylland & Fyn)</option>
+                        <option value="DK2">DK2 (East / Sjælland)</option>
+                    </select>
+                </div>
+
                 <div class="form-group" style="margin-bottom: 15px;">
                     <label for="chargePower" id="labelChargePower">Charging Power</label>
                     <div class="input-suffix">

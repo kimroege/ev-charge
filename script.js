@@ -3,12 +3,14 @@ let allTranslations = {};
 let currentLanguage = 'en';
 let presets = {};
 let priceChartInstance = null;
+let lastCalculationData = null;
 
 // DOM Elements Cache
 const elements = {
     settingsModal: () => document.getElementById('settingsModal'),
     presetSelect: () => document.getElementById('presetSelect'),
     carList: () => document.getElementById('carList'),
+    priceAreaSelect: () => document.getElementById('priceAreaSelect'),
     taxRefundCheckbox: () => document.getElementById('taxRefundCheckbox'),
     showGraphCheckbox: () => document.getElementById('showGraphCheckbox'),
     chargeForm: () => document.getElementById('chargeForm'),
@@ -53,8 +55,22 @@ function setupEventListeners() {
     // Inputs
     elements.presetSelect().addEventListener('change', loadPreset);
     elements.languageSelect().addEventListener('change', changeLanguage);
+    if (elements.priceAreaSelect()) {
+        elements.priceAreaSelect().addEventListener('change', () => {
+            savePriceAreaSetting();
+            if (lastCalculationData) {
+                const formEvent = new Event('submit', { cancelable: true });
+                elements.chargeForm().dispatchEvent(formEvent);
+            }
+        });
+    }
     elements.taxRefundCheckbox().addEventListener('change', saveTaxRefundSetting);
-    elements.showGraphCheckbox().addEventListener('change', saveGraphSetting);
+    elements.showGraphCheckbox().addEventListener('change', () => {
+        saveGraphSetting();
+        if (lastCalculationData) {
+            renderChart(lastCalculationData.allPrices, lastCalculationData.bestStartIndex, lastCalculationData.slotsNeeded);
+        }
+    });
     document.getElementById('btnSave').addEventListener('click', savePreset);
     
     // Form
@@ -100,6 +116,17 @@ function loadPresetsFromStorage() {
     const storedShowGraph = localStorage.getItem('evChargeShowGraph');
     if (storedShowGraph === 'true') {
         elements.showGraphCheckbox().checked = true;
+    }
+
+    const storedPriceArea = localStorage.getItem('evChargePriceArea');
+    if (storedPriceArea && elements.priceAreaSelect()) {
+        elements.priceAreaSelect().value = storedPriceArea;
+    }
+}
+
+function savePriceAreaSetting() {
+    if (elements.priceAreaSelect()) {
+        localStorage.setItem('evChargePriceArea', elements.priceAreaSelect().value);
     }
 }
 
@@ -238,6 +265,7 @@ function updateUI() {
         'subtitle': t.subtitle,
         'modalTitle': t.modalTitle,
         'labelLanguage': t.labelLanguage,
+        'labelPriceArea': t.labelPriceArea,
         'labelSavePreset': t.labelSavePreset,
         'labelManageCars': t.labelManageCars,
         'labelTaxRefund': t.labelTaxRefund,
@@ -249,6 +277,8 @@ function updateUI() {
         'labelChargeEfficiency': t.labelChargeEfficiency,
         'calculateBtn': t.calculateBtn,
         'resultLabel': t.resultLabel,
+        'priceLabel': t.priceLabel,
+        'dataAttribution': t.dataAttribution,
         'btnSave': t.btnSave
     };
 
@@ -276,11 +306,25 @@ async function fetchAndCalculatePrices(hoursNeeded, energyNeeded) {
         elements.bestStartTime().textContent = "Loading...";
         elements.priceDetails().textContent = "";
 
-        const proxyUrl = 'https://corsproxy.io/?';
-        const targetUrl = 'https://billigkwh.dk/api/Priser/HentPriser?sted=DK1&netselskab=n1_c&produkt=norlys_flexel';
+        const priceArea = (elements.priceAreaSelect && elements.priceAreaSelect()) 
+            ? elements.priceAreaSelect().value 
+            : (localStorage.getItem('evChargePriceArea') || 'DK1');
         
-        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-        if (!response.ok) throw new Error('Network response was not ok');
+        // For DK1 (West Denmark), N1 (n1_c) is the primary grid operator.
+        // For DK2 (East Denmark), Radius (radius_c) is the primary grid operator.
+        const supplierId = priceArea === 'DK2' ? 'radius_c' : 'n1_c';
+        const targetUrl = `https://stromligning.dk/api/prices?priceArea=${priceArea}&supplierId=${supplierId}&productId=norlys_flexel&aggregation=1h`;
+        
+        let response;
+        try {
+            response = await fetch(targetUrl);
+        } catch (directError) {
+            console.warn("Direct fetch failed, falling back to proxy:", directError);
+            const proxyUrl = 'https://corsproxy.io/?';
+            response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+        }
+
+        if (!response.ok) throw new Error(`Network response was not ok (${response.status})`);
         
         const data = await response.json();
         
@@ -292,6 +336,7 @@ async function fetchAndCalculatePrices(hoursNeeded, energyNeeded) {
         console.error("Fetch error:", error);
         elements.bestStartTime().textContent = "Error";
         elements.priceDetails().textContent = t.fetchError || "Could not fetch prices";
+        lastCalculationData = null;
     }
 }
 
@@ -301,23 +346,26 @@ function processPriceData(data) {
     const currentHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0);
     const applyTaxRefund = elements.taxRefundCheckbox().checked;
     const taxRefundAmount = 0.895;
-    const taxRefundEndDate = new Date('2026-01-01T00:00:00');
+    const taxRefundEndDate = new Date('2031-01-01T00:00:00');
 
-    data.forEach(dayData => {
-        const date = new Date(dayData.dato);
-        dayData.priser.forEach((price, hourIndex) => {
-            const priceTime = new Date(date);
-            priceTime.setHours(hourIndex);
-            
-            if (priceTime >= currentHour) {
-                let finalPrice = price;
-                if (applyTaxRefund && priceTime < taxRefundEndDate) {
-                    finalPrice -= taxRefundAmount;
-                }
-                allPrices.push({ time: priceTime, price: finalPrice });
+    // Strømligning API returns { priceArea: '...', prices: [ ... ] }, or directly an array if lean=true
+    const items = (data && Array.isArray(data.prices)) ? data.prices : (Array.isArray(data) ? data : []);
+
+    items.forEach(item => {
+        const priceTime = item.localDate ? new Date(item.localDate) : new Date(item.date);
+        
+        if (priceTime >= currentHour) {
+            let finalPrice = (typeof item.price === 'object' && item.price !== null) 
+                ? item.price.total 
+                : Number(item.price);
+
+            if (applyTaxRefund && priceTime < taxRefundEndDate) {
+                finalPrice -= taxRefundAmount;
             }
-        });
+            allPrices.push({ time: priceTime, price: finalPrice });
+        }
     });
+
     return allPrices;
 }
 
@@ -351,10 +399,17 @@ function calculateBestTime(allPrices, hoursNeeded, energyNeeded) {
     const totalEstimatedCost = avgPrice * energyNeeded;
 
     const startTimeStr = bestStart.time.toLocaleTimeString(currentLanguage, { hour: '2-digit', minute: '2-digit', hour12: false });
-    elements.bestStartTime().textContent = `Start: ${startTimeStr}`;
+    const today = new Date();
+    const isToday = bestStart.time.getDate() === today.getDate() && 
+                    bestStart.time.getMonth() === today.getMonth() && 
+                    bestStart.time.getFullYear() === today.getFullYear();
+    const dayPrefix = isToday ? '' : bestStart.time.toLocaleDateString(currentLanguage, { weekday: 'short' }) + ' ';
+
+    elements.bestStartTime().textContent = `Start: ${dayPrefix}${startTimeStr}`;
     elements.priceDetails().textContent = 
         `${t.avgPrice || 'Avg Price'}: ${avgPrice.toFixed(2)} DKK/kWh | ${t.totalCost || 'Est. Cost'}: ${totalEstimatedCost.toFixed(2)} DKK`;
 
+    lastCalculationData = { allPrices, bestStartIndex, slotsNeeded };
     renderChart(allPrices, bestStartIndex, slotsNeeded);
 }
 
@@ -406,6 +461,19 @@ function renderChart(allPrices, bestStartIndex, slotsNeeded) {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
+                        title: (tooltipItems) => {
+                            if (!tooltipItems || tooltipItems.length === 0) return '';
+                            const idx = tooltipItems[0].dataIndex;
+                            const p = allPrices[idx];
+                            return p ? p.time.toLocaleString(currentLanguage, { 
+                                weekday: 'short', 
+                                month: 'numeric', 
+                                day: 'numeric', 
+                                hour: '2-digit', 
+                                minute: '2-digit', 
+                                hour12: false 
+                            }) : '';
+                        },
                         label: (context) => context.parsed.y.toFixed(2) + ' DKK'
                     }
                 }

@@ -30,7 +30,9 @@ const translations = {
         "totalCost": "Est. Cost",
         "fetchError": "Could not fetch prices",
         "labelTaxRefund": "Apply Tax Refund (0.895 DKK)",
-        "labelShowGraph": "Show Price Graph"
+        "labelShowGraph": "Show Price Graph",
+        "labelPriceArea": "Price Area",
+        "dataAttribution": "Price data from"
     },
     "da": {
         "title": "EL-Bil Opladningsberegner",
@@ -63,7 +65,9 @@ const translations = {
         "totalCost": "Est. Pris",
         "fetchError": "Kunne ikke hente priser",
         "labelTaxRefund": "Anvend Elafgiftsrefusion (0,895 DKK)",
-        "labelShowGraph": "Vis Prisgraf"
+        "labelShowGraph": "Vis Prisgraf",
+        "labelPriceArea": "Prisområde",
+        "dataAttribution": "Elpriser leveret af"
     },
     "no": {
         "title": "Elbil Ladekalkulator",
@@ -96,7 +100,9 @@ const translations = {
         "totalCost": "Est. Kostnad",
         "fetchError": "Kunne ikke hente priser",
         "labelTaxRefund": "Bruk Elafgiftsrefusjon (0,895 DKK)",
-        "labelShowGraph": "Vis Prisgraf"
+        "labelShowGraph": "Vis Prisgraf",
+        "labelPriceArea": "Prisområde",
+        "dataAttribution": "Strømpriser levert av"
     },
     "sv": {
         "title": "Elbil Laddningskalkylator",
@@ -129,7 +135,9 @@ const translations = {
         "totalCost": "Est. Kostnad",
         "fetchError": "Kunde inte hämta priser",
         "labelTaxRefund": "Tillämpa Elskatteåterbäring (0,895 DKK)",
-        "labelShowGraph": "Visa Prisgraf"
+        "labelShowGraph": "Visa Prisgraf",
+        "labelPriceArea": "Prisområde",
+        "dataAttribution": "Elpriser levererade av"
     },
     "de": {
         "title": "E-Auto Laderechner",
@@ -162,7 +170,9 @@ const translations = {
         "totalCost": "Geschätzte Kosten",
         "fetchError": "Preise konnten nicht abgerufen werden",
         "labelTaxRefund": "Stromsteuerrückerstattung anwenden (0,895 DKK)",
-        "labelShowGraph": "Preisdiagramm anzeigen"
+        "labelShowGraph": "Preisdiagramm anzeigen",
+        "labelPriceArea": "Preisgebiet",
+        "dataAttribution": "Strompreise von"
     },
     "fr": {
         "title": "Calculateur de Charge VE",
@@ -195,7 +205,9 @@ const translations = {
         "totalCost": "Coût Est.",
         "fetchError": "Impossible de récupérer les prix",
         "labelTaxRefund": "Appliquer le remboursement de la taxe (0,895 DKK)",
-        "labelShowGraph": "Afficher le graphique des prix"
+        "labelShowGraph": "Afficher le graphique des prix",
+        "labelPriceArea": "Zone Tarifaire",
+        "dataAttribution": "Prix de l'électricité par"
     },
     "nl": {
         "title": "Elektrische Auto Laadcalculator",
@@ -228,6 +240,8 @@ const translations = {
         "totalCost": "Geschatte Kosten",
         "fetchError": "Kan prijzen niet ophalen",
         "labelTaxRefund": "Belastingteruggave toepassen (0,895 DKK)",
-        "labelShowGraph": "Prijsgrafiek weergeven"
+        "labelShowGraph": "Prijsgrafiek weergeven",
+        "labelPriceArea": "Prijsgebied",
+        "dataAttribution": "Elektriciteitsprijzen van"
     }
 };
